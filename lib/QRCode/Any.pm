@@ -26,10 +26,22 @@ MARKDOWN
         cmdline_aliases => {f=>{}},
     },
 );
+our %argspecopt_format_args = (
+    format_args => {
+        schema => 'hash*',
+        description => <<'MARKDOWN',
+
+Format-specific arguments.
+
+MARKDOWN
+    },
+);
 our %argspecs_format = (
     %argspecopt_format,
     %argspecopt_format_args,
 );
+
+our %SPEC;
 
 $SPEC{':package'} = {
     v => 1.1,
@@ -65,7 +77,7 @@ sub encode_qrcode {
     if ($format eq 'png') {
         require Imager::QRCode;
         my $qrcode = Imager::QRCode->new(
-            size          => 2,
+            size          => 5,
             margin        => 2,
             version       => 1,
             level         => 'M',
@@ -73,10 +85,10 @@ sub encode_qrcode {
             lightcolor    => Imager::Color->new(255, 255, 255),
             darkcolor     => Imager::Color->new(0, 0, 0),
         );
-        my $img = $qrcode->plot("blah blah");
+        my $img = $qrcode->plot($args{text});
         my $filename = $args{filename};
         $filename .= ".png" unless $filename =~ /\.png\z/;
-        $img->write(file => $filename);
+        $img->write(file => $filename)
             or return [500,  "Failed to write to file `$filename`: " . $img->errstr];
         [200, "OK", undef, {"func.filename"=>$filename}];
     } else {
