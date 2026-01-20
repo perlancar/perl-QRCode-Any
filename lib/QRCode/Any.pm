@@ -81,6 +81,7 @@ sub encode_qrcode {
     my $level  = $args{level} // 'M';
 
     if ($format eq 'png') {
+        require Imager;
         require Imager::QRCode;
         my $qrcode = Imager::QRCode->new(
             size          => 5,
@@ -91,11 +92,17 @@ sub encode_qrcode {
             lightcolor    => Imager::Color->new(255, 255, 255),
             darkcolor     => Imager::Color->new(0, 0, 0),
         );
+
+        # generates rub-through image
         my $img = $qrcode->plot($args{text});
+
+        my $conv_img = $img->to_rgb8
+            or die "converting with to_rgb8() failed: " . Imager->errstr;
+
         my $filename = $args{filename};
         $filename .= ".png" unless $filename =~ /\.png\z/;
-        $img->write(file => $filename)
-            or return [500,  "Failed to write to file `$filename`: " . $img->errstr];
+        $conv_img->write(file => $filename)
+            or return [500,  "Failed to write to file `$filename`: " . $conv_img->errstr];
         [200, "OK", undef, {"func.filename"=>$filename}];
     } else {
         [501, "Unsupported format '$format'"];
