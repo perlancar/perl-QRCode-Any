@@ -68,11 +68,17 @@ MARKDOWN
             schema => 'filename*',
             req => 1,
         },
+        level => {
+            summary => 'Error correction level',
+            schema => ['str*', in=>[qw/L M Q H/]],
+            default => 'M',
+        },
     },
 };
 sub encode_qrcode {
     my %args = @_;
     my $format = $args{format} // 'png';
+    my $level  = $args{level} // 'M';
 
     if ($format eq 'png') {
         require Imager::QRCode;
@@ -80,7 +86,7 @@ sub encode_qrcode {
             size          => 5,
             margin        => 2,
             version       => 1,
-            level         => 'M',
+            level         => $level,
             casesensitive => 1,
             lightcolor    => Imager::Color->new(255, 255, 255),
             darkcolor     => Imager::Color->new(0, 0, 0),
